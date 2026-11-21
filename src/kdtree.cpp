@@ -3,6 +3,7 @@
 #include <algorithm>  // std::nth_element
 #include <limits>     // std::numeric_limits (infinito)
 #include <numeric>    // std::iota
+#include <queue>      // std::priority_queue
 
 namespace kd {
 
@@ -90,6 +91,51 @@ void buscar_1nn(const std::vector<Escalar>& pontos, int dim,
     }
 }
 
+// Regra de comparação da fila: o vizinho de MAIOR distância fica no topo.
+// Assim o topo é sempre o "pior dos k melhores", o primeiro a ser expulso.
+struct MaiorDistanciaNoTopo {
+    bool operator()(const Vizinho& a, const Vizinho& b) const {
+        return a.distancia2 < b.distancia2;
+    }
+};
+using FilaDosMelhores =
+    std::priority_queue<Vizinho, std::vector<Vizinho>, MaiorDistanciaNoTopo>;
+
+// Busca recursiva dos k vizinhos mais próximos. Igual ao 1-NN, mas em vez de
+// um único 'melhor' mantemos uma fila com os k melhores encontrados até agora.
+void buscar_knn(const std::vector<Escalar>& pontos, int dim,
+                const std::vector<No>& nos, int no,
+                const Escalar* consulta, int k, FilaDosMelhores& fila) {
+
+    if (no == -1) return;
+
+    const No& x = nos[no];
+    const Escalar* p = &pontos[x.ponto * dim];
+
+    // 1) Tenta colocar o ponto deste nó entre os k melhores.
+    Escalar d2 = distancia2(p, consulta, dim);
+    if (static_cast<int>(fila.size()) < k) {
+        fila.push(Vizinho{x.ponto, d2});          // ainda tem vaga
+    } else if (d2 < fila.top().distancia2) {
+        fila.pop();                               // expulsa o pior dos k
+        fila.push(Vizinho{x.ponto, d2});
+    }
+
+    // 2) Lado perto primeiro, como no 1-NN.
+    Escalar diferenca = consulta[x.eixo] - p[x.eixo];
+    int perto = (diferenca < 0) ? x.esquerda : x.direita;
+    int longe = (diferenca < 0) ? x.direita : x.esquerda;
+    buscar_knn(pontos, dim, nos, perto, consulta, k, fila);
+
+    // 3) PODA: se a fila ainda não está cheia, qualquer ponto serve, então
+    //    não dá para podar. Se está cheia, só vale visitar o lado longe se o
+    //    plano de corte estiver mais perto que o k-ésimo melhor (o topo).
+    bool fila_cheia = static_cast<int>(fila.size()) == k;
+    if (!fila_cheia || diferenca * diferenca < fila.top().distancia2) {
+        buscar_knn(pontos, dim, nos, longe, consulta, k, fila);
+    }
+}
+
 }  // namespace
 
 ArvoreKD::ArvoreKD(const Escalar* pontos, int n, int dim)
@@ -109,6 +155,24 @@ Vizinho ArvoreKD::vizinho_mais_proximo(const Escalar* consulta) const {
     Vizinho melhor{-1, std::numeric_limits<Escalar>::infinity()};
     buscar_1nn(pontos_, dim_, nos_, raiz_, consulta, melhor);
     return melhor;
+}
+
+std::vector<Vizinho> ArvoreKD::k_vizinhos(const Escalar* consulta, int k) const {
+    std::vector<Vizinho> resultado;
+    if (k <= 0) return resultado;
+
+    FilaDosMelhores fila;
+    buscar_knn(pontos_, dim_, nos_, raiz_, consulta, k, fila);
+
+    // A fila entrega do PIOR para o MELHOR; preenchemos de trás para frente
+    // para o resultado sair ordenado do mais perto ao mais longe.
+    // (Se k > n, a fila terá só n elementos e devolvemos todos.)
+    resultado.resize(fila.size());
+    for (int i = static_cast<int>(fila.size()) - 1; i >= 0; i--) {
+        resultado[i] = fila.top();
+        fila.pop();
+    }
+    return resultado;
 }
 
 }  // namespace kd
