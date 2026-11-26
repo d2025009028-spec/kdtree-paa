@@ -1,11 +1,12 @@
 # KD-Tree: vizinho mais próximo (1-NN e k-NN)
 
 Trabalho prático de PAA (CTC04, Prof. Sávio S. Dias), tema 1.3.
-Equipe: 
-Nome: Cauã Cesar Brandão Gonçalves - Matrícula: 2025009028 
-Nome: Davi Henrique Maia Braga - Matrícula: 2024016350
-Nome: Eduardo Antônio dos Santos Silva - Matrícula: 2025007936
-Nome: Gabriel Bueno de Camargo Stricker - Matrícula: 2025013174
+
+**Equipe:** 
+- **Nome:** Cauã Cesar Brandão Gonçalves - **Matrícula:** 2025009028 
+- **Nome:** Davi Henrique Maia Braga - **Matrícula:** 2024016350
+- **Nome:** Eduardo Antônio dos Santos Silva - **Matrícula:** 2025007936
+- **Nome:** Gabriel Bueno de Camargo Stricker - **Matrícula:** 2025013174
 
 A gente implementou uma KD-Tree em C++ para achar o vizinho mais próximo de um ponto (1-NN) e os k vizinhos mais próximos (k-NN). Depois comparamos com a força bruta, paralelizamos com OpenMP e CUDA e medimos o que acontece quando a dimensão aumenta (a "maldição da dimensionalidade").
 
