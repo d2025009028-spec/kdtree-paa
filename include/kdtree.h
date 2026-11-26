@@ -15,8 +15,8 @@ struct Vizinho {
 struct No {
     int ponto;     // índice do ponto que está nesse nó
     int eixo;      // eixo de corte
-    int esquerda;  // filho esquerdo (valores menores do que a mediana no eixo)
-    int direita;   // filho direito  (valores maiores do que a mediana no eixo)
+    int esquerda;  // filho esquerdo (valores menores ou iguais do que a mediana no eixo)
+    int direita;   // filho direito  (valores maiores ou iguais do que a mediana no eixo)
 };
 
 class ArvoreKD {
