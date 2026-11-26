@@ -77,7 +77,7 @@ g++ -O2 -std=c++17 -fopenmp -Iinclude src/kdtree.cpp benchmarks/bench_threads.cp
 ./bench_threads 3 1.0
 ```
 
-Os argumentos são as repetições e a escala.
+Os argumentos são as repetições e a escala. O resultado é gravado em `resultados_threads.csv` na pasta onde você rodou o programa.Para usar nos scripts, mova esse arquivo para `resultados/`.
 
 **Benchmark principal** (CPU sequencial, OpenMP, GPU com KD-Tree e GPU com força bruta, em `double` e `float`):
 
